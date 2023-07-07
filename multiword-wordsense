@@ -1,0 +1,54 @@
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+# Sentence containing multiword expressions
+sentence = "I have a chip on my shoulder and a bee in my bonnet."
+# Tokenize the sentence into words
+tokens = nltk.word_tokenize(sentence)
+# Apply part-of-speech tagging
+pos_tags = nltk.pos_tag(tokens)
+# Identify multiword expressions using chunking
+grammar = r""" MWE: {<NN><IN><PRP.*>}
+ {<DT><NN><IN><PRP.*>}
+"""
+chunk_parser = nltk.RegexpParser(grammar)
+chunks = chunk_parser.parse(pos_tags)
+# Extract multiword expressions from the chunks
+mwe_list = []
+for chunk in chunks:
+ if isinstance(chunk, nltk.tree.Tree) and chunk.label() == 'MWE':
+  mwe = ' '.join(word for word, _ in chunk.leaves())
+  mwe_list.append(mwe)
+# Print the identified multiword expressions
+print("Multiword Expressions:")
+for mwe in mwe_list:
+ print(mwe)
+
+import nltk
+nltk.download('wordnet')
+from nltk.corpus import wordnet
+def lesk_algorithm(word, context):
+ best_sense = None
+ max_overlap = 0
+ word_synsets = wordnet.synsets(word)
+ for synset in word_synsets:
+  signature = set(synset.definition().split())
+  examples = set()
+ for example in synset.examples():
+  examples.update(example.split())
+  signature.update(examples)
+  overlap = len(signature.intersection(context))
+ if overlap > max_overlap:
+  max_overlap = overlap
+  best_sense = synset
+  return best_sense
+# Example usage
+word = "bank"
+context = set(["I", "went", "to", "the", "river", "bank"])
+sense = lesk_algorithm(word, context)
+if sense:
+ print(f"Word: {word}")
+ print(f"Sense: {sense.name()} - {sense.definition()}")
+else:
+ print("No sense found for the word.")
+
